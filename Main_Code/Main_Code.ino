@@ -28,10 +28,10 @@ int M_CCW = 30;                             //LED Indicator for CCW Direction.
 //--------------------------------------------------------------------------------------
 //Light Bar indicators
 //--------------------------------------------------------------------------------------
-int S_Rd = 24;                              //Light Bar Red Indicator.
+int S_Rd = 27;                              //Light Bar Red Indicator.
 int S_Og = 25;                              //Light Bar Orange Indicator.
-int S_Gn = 26;                              //Light Bar Green Incicator.
-int S_Buzz = 27;                            //Light Bar Buzzer signal.
+int S_Gn = 24;                              //Light Bar Green Incicator.
+int S_Buzz = 26;                            //Light Bar Buzzer signal.
 
 //--------------------------------------------------------------------------------------
 //Laser Light Sensors
@@ -105,10 +105,10 @@ void setup()
   pinMode (S_Og, OUTPUT);                    //Defining Pins Mode (Output).
   pinMode (S_Gn, OUTPUT);                    //Defining Pins Mode (Output).
   pinMode (S_Buzz, OUTPUT);                  //Defining Pins Mode (Output).
-  pinMode (L_Top_Shift, INPUT_PULLUP);              //Defining Pins Mode (Input).
-  pinMode (L_Tray_Shift, INPUT_PULLUP);             //Defining Pins Mode (Input).
-  pinMode (L_SizeA_Shift, INPUT_PULLUP);            //Defining Pins Mode (Input).
-  pinMode (L_SizeB_Shift, INPUT_PULLUP);            //Defining Pins Mode (Input).
+  pinMode (L_Top_Shift, INPUT);              //Defining Pins Mode (Input).
+  pinMode (L_Tray_Shift, INPUT);             //Defining Pins Mode (Input).
+  pinMode (L_SizeA_Shift, INPUT);            //Defining Pins Mode (Input).
+  pinMode (L_SizeB_Shift, INPUT);            //Defining Pins Mode (Input).
   pinMode (B_Emergency, INPUT_PULLUP);              //Defining Pins Mode (Input).
   pinMode (B_RangeUp, INPUT_PULLUP);                //Defining Pins Mode (Input).
   pinMode (B_RangeDown, INPUT_PULLUP);              //Defining Pins Mode (Input).
@@ -129,14 +129,87 @@ void setup()
 
 
 void loop() 
+
 {
+  //digitalWrite(S_Rd, LOW);                   //Default Status Light LED Is High (Off).
+  //delay(1000);
+  //digitalWrite(S_Og, LOW);                   //Default Status Light LED Is High (Off).
+  //delay(1000);
+  //digitalWrite(S_Gn, LOW);                   //Default Status Light LED Is High (Off).
+  //delay(2000);
+  //digitalWrite(S_Buzz, LOW);                 //Default Status Light Buzzer Is High (Off).
+  //delay(2000);
+  //digitalWrite(S_Rd, HIGH);                   //Default Status Light LED Is High (Off).
+  //digitalWrite(S_Og, HIGH);                   //Default Status Light LED Is High (Off).
+  //digitalWrite(S_Gn, HIGH);                   //Default Status Light LED Is High (Off).
+  //digitalWrite(S_Buzz, HIGH);                   //Default Status Light LED Is High (Off).
+  //delay(2000);
+//}
+  
+
+if (digitalRead(M_Enable) == LOW)
+  {
+    Enable = !Enable;                         //Enabling or disabling the Motor By programming Oposite logic.
+    digitalWrite(M_Driver_Activate, Enable);
+    digitalWrite(M_En, Enable);
+    digitalWrite(M_Enabled, !Enable);                 //Motor Enable LED to Follow M_Enable Variable Logic (Activate Low)
+    delay(200);
+  }
+ else if(digitalRead(M_Reverse) == LOW)
+ {
+  Reverse = !Reverse;
+  digitalWrite(M_Dir, Reverse);                   //Default Status Light LED Is High (Off).
+  digitalWrite(M_CW, Reverse);                //Motor CW LED to Follow Reverse.
+  digitalWrite(M_CCW, !Reverse);              //Motor CCW LED to Follow Oposite of Reverse
+  delay(200);
+ }
+ else if (digitalRead(L_Top_Shift) == LOW)
+ {
+  digitalWrite(M_Pul, HIGH);
+  delayMicroseconds(Pulse_Delay);
+  digitalWrite(M_Pul, LOW);
+  delayMicroseconds(Pulse_Delay);
+      
+ }
+
+}
+
+void Accelerate()
+{
+  
+ for (int x = 0; x < 2310; x++)
+    {
+      digitalWrite(M_Pul, HIGH);
+      delayMicroseconds(Pulse_Delay);
+      digitalWrite(M_Pul, LOW);
+      delayMicroseconds(Pulse_Delay);
+      Pulse_Delay--;
+    }
+ //delay(1000);
+for(int x = 0; x < 69540; x++) 
+  {
+    digitalWrite(M_Pul,HIGH); 
+    delayMicroseconds(Pulse_Delay); 
+    digitalWrite(M_Pul,LOW); 
+    delayMicroseconds(Pulse_Delay); 
+  }
+for (int y = 0; y < 2100; y++)
+    {
+      digitalWrite(M_Pul, HIGH);
+      delayMicroseconds(Pulse_Delay);
+      digitalWrite(M_Pul, LOW);
+      delayMicroseconds(Pulse_Delay);
+      Pulse_Delay++;
+    } 
+}
+   
    //if (runOnlyOnceL1 = false)
    //{
-    Level1();
+    //Level1();
    //}
 //Idle();
 //delay(100);
-}
+//}
 
 //--------------------------------------------------------------------------------------
 //Code Functions.
@@ -152,9 +225,9 @@ void initializing()
   digitalWrite(S_Buzz, LOW);                 //Default Status Light Buzzer Is High (Off).
   delay(1000);
   digitalWrite(S_Rd, HIGH);                   //Default Status Light LED Is High (Off).
-  digitalWrite(S_Rd, HIGH);                   //Default Status Light LED Is High (Off).
-  digitalWrite(S_Rd, HIGH);                   //Default Status Light LED Is High (Off).
-  digitalWrite(S_Rd, HIGH);                   //Default Status Light LED Is High (Off).
+  digitalWrite(S_Og, HIGH);                   //Default Status Light LED Is High (Off).
+  digitalWrite(S_Gn, HIGH);                   //Default Status Light LED Is High (Off).
+  digitalWrite(S_Buzz, HIGH);                   //Default Status Light LED Is High (Off).
   digitalWrite(M_Driver_Activate, HIGH);
   delay(400);
   digitalWrite(M_Driver_Activate, LOW);
@@ -234,6 +307,7 @@ void Manual_Override()
   {
     Enable = !Enable;                         //Enabling or disabling the Motor By programming Oposite logic.
     digitalWrite(M_Driver_Activate, Enable);
+    digitalWrite(M_En, Enable);
     digitalWrite(M_Enabled, !Enable);                 //Motor Enable LED to Follow M_Enable Variable Logic (Activate Low)
     delay(100);
   }
