@@ -129,24 +129,7 @@ void setup()
 
 
 void loop() 
-
 {
-  //digitalWrite(S_Rd, LOW);                   //Default Status Light LED Is High (Off).
-  //delay(1000);
-  //digitalWrite(S_Og, LOW);                   //Default Status Light LED Is High (Off).
-  //delay(1000);
-  //digitalWrite(S_Gn, LOW);                   //Default Status Light LED Is High (Off).
-  //delay(2000);
-  //digitalWrite(S_Buzz, LOW);                 //Default Status Light Buzzer Is High (Off).
-  //delay(2000);
-  //digitalWrite(S_Rd, HIGH);                   //Default Status Light LED Is High (Off).
-  //digitalWrite(S_Og, HIGH);                   //Default Status Light LED Is High (Off).
-  //digitalWrite(S_Gn, HIGH);                   //Default Status Light LED Is High (Off).
-  //digitalWrite(S_Buzz, HIGH);                   //Default Status Light LED Is High (Off).
-  //delay(2000);
-//}
-  
-
 if (digitalRead(M_Enable) == LOW)
   {
     Enable = !Enable;                         //Enabling or disabling the Motor By programming Oposite logic.
@@ -155,7 +138,8 @@ if (digitalRead(M_Enable) == LOW)
     digitalWrite(M_Enabled, !Enable);                 //Motor Enable LED to Follow M_Enable Variable Logic (Activate Low)
     delay(200);
   }
- else if(digitalRead(M_Reverse) == LOW)
+  
+  else if (digitalRead(M_Reverse) == LOW) 
  {
   Reverse = !Reverse;
   digitalWrite(M_Dir, Reverse);                   //Default Status Light LED Is High (Off).
@@ -163,21 +147,29 @@ if (digitalRead(M_Enable) == LOW)
   digitalWrite(M_CCW, !Reverse);              //Motor CCW LED to Follow Oposite of Reverse
   delay(200);
  }
- else if (digitalRead(L_Top_Shift) == LOW)
+ 
+ else if (digitalRead(M_Up) == LOW)
  {
-  digitalWrite(M_Pul, HIGH);
-  delayMicroseconds(Pulse_Delay);
-  digitalWrite(M_Pul, LOW);
-  delayMicroseconds(Pulse_Delay);
+  Accelerate();
+ 
+  //digitalWrite(M_Pul, HIGH);
+  //delayMicroseconds(Pulse_Delay);
+  //digitalWrite(M_Pul, LOW);
+  //delayMicroseconds(Pulse_Delay);
+/*     
+ else if (digitalRead(M_Manual_Override) == LOW)
+    {
       
- }
-
+      Accelerate();
+    }
+*/
+}
 }
 
 void Accelerate()
 {
   
- for (int x = 0; x < 2310; x++)
+ for (int x = 0; x < 2100; x++)
     {
       digitalWrite(M_Pul, HIGH);
       delayMicroseconds(Pulse_Delay);
@@ -298,8 +290,8 @@ void Destacker()
 }
 void Manual_Override()
 {
-  digitalWrite(M_Manual_Override, LOW);  
-  Pulse_Delay = map((analogRead(M_Speed)),0,1023,2500,300);
+  //digitalWrite(M_Manual_Override, LOW);  
+  //Pulse_Delay = map((analogRead(M_Speed)),0,1023,2500,300);
   //delay(1000);
   Serial.print("\n");
   Serial.print(Pulse_Delay);
