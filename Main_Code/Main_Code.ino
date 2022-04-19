@@ -37,8 +37,8 @@ int S_Buzz = 26;                            //Light Bar Buzzer signal.
 //Laser Light Sensors
 //--------------------------------------------------------------------------------------
 int L_Top_Shift = 31;                       //Laser Sensor Tower Top.
-int L_Tray_Shift = 32;                      //Laser Sensor Tray Present.
-int L_SizeA_Shift = 33;                     //Laser Sensor Tray Size A.
+int L_Tray_Shift = 33;                      //Laser Sensor Tray Present.
+int L_SizeA_Shift = 32;                     //Laser Sensor Tray Size A.
 int L_SizeB_Shift = 34;                     //Laser Sensor Tray Size B.
 
 //--------------------------------------------------------------------------------------
@@ -73,10 +73,7 @@ int Pulse_Delay = 2500;                      //Pulse Delay Period.
 int Slave = 0;
 String Mode;
 int Trays_Count = 0;
-static bool runOnlyOnce = false;
-static bool runOnlyOnceL1 = false;
-
-
+boolean runOnlyOnce = false;
 void setup()
 {
   Serial.begin(9600);                    //Initiating Remote serial communication for Main System.
@@ -124,7 +121,8 @@ void setup()
   //--------------------------------------------------------------------------------------
   //Interrupt Functions.
   //--------------------------------------------------------------------------------------
-//attachInterrupt(digitalPinToInterrupt(M_Manual_Override), Manual_Override, FALLING);         //Interrupt to Manual Override when Switch pressed.
+  attachInterrupt(digitalPinToInterrupt(B_RangeDown), Hard_Limit, LOW);         //Interrupt to Manual Override when Switch pressed.
+  attachInterrupt(digitalPinToInterrupt(B_RangeUp), Hard_Limit, LOW);         //Interrupt to Manual Override when Switch pressed.
 }
 
 
@@ -150,26 +148,59 @@ if (digitalRead(M_Enable) == LOW)
  
  else if (digitalRead(M_Up) == LOW)
  {
-  Accelerate();
- 
-  //digitalWrite(M_Pul, HIGH);
-  //delayMicroseconds(Pulse_Delay);
-  //digitalWrite(M_Pul, LOW);
-  //delayMicroseconds(Pulse_Delay);
-/*     
- else if (digitalRead(M_Manual_Override) == LOW)
+  Accelerate_Up();
+ }
+ else if (digitalRead(M_Down) == LOW)
+ {
+  Accelerate_Down();
+ }
+ else if (digitalRead(M_Manual) == LOW)
     {
-      
-      Accelerate();
+      digitalWrite(M_Manual_Override, LOW);
+      delay(200);
+      Next_Trigger();
     }
-*/
+ /* 
+    while((digitalRead(L_Top_Shift) == HIGH) && (digitalRead(L_Tray_Shift) == HIGH))
+    {
+      digitalWrite(M_Pul, HIGH);
+      delayMicroseconds(Pulse_Delay);
+      digitalWrite(M_Pul, LOW);
+      delayMicroseconds(Pulse_Delay);
+    } 
+  */
 }
-}
-
-void Accelerate()
+/*
+void Start()
 {
+  if ((digitalRead(L_Tray_Shift) == HIGH))
+  {
+    Next_Trigger;
+  }
+}
+*/
+void Hard_Limit()
+ {
+  Reverse = !Reverse;
+  digitalWrite(M_Dir, Reverse);                   //Default Status Light LED Is High (Off).
+  digitalWrite(M_CW, Reverse);                //Motor CW LED to Follow Reverse.
+  digitalWrite(M_CCW, !Reverse);              //Motor CCW LED to Follow Oposite of Reverse
   
- for (int x = 0; x < 2100; x++)
+  for (int x = 0; x < 200; x++)
+         {
+          digitalWrite(M_Pul, HIGH);
+          delayMicroseconds(Pulse_Delay);
+          digitalWrite(M_Pul, LOW);
+          delayMicroseconds(Pulse_Delay);
+         }
+digitalWrite(M_En, LOW);
+loop;    
+ }
+   
+void Accelerate_Down()
+{
+Pulse_Delay = 2500;
+for (int x = 0; x < 2360; x++)
     {
       digitalWrite(M_Pul, HIGH);
       delayMicroseconds(Pulse_Delay);
@@ -177,35 +208,77 @@ void Accelerate()
       delayMicroseconds(Pulse_Delay);
       Pulse_Delay--;
     }
- //delay(1000);
-for(int x = 0; x < 69540; x++) 
-  {
-    digitalWrite(M_Pul,HIGH); 
-    delayMicroseconds(Pulse_Delay); 
-    digitalWrite(M_Pul,LOW); 
-    delayMicroseconds(Pulse_Delay); 
-  }
-for (int y = 0; y < 2100; y++)
+
+while (digitalRead(L_SizeB_Shift) == HIGH)
+   {
+      digitalWrite(M_Pul,HIGH); 
+      delayMicroseconds(Pulse_Delay); 
+      digitalWrite(M_Pul,LOW); 
+      delayMicroseconds(Pulse_Delay); 
+   }
+
+Slow();
+}
+
+  void Accelerate_Up()
+{
+
+Pulse_Delay = 2500;
+
+for (int x = 0; x < 2320; x++)
     {
       digitalWrite(M_Pul, HIGH);
       delayMicroseconds(Pulse_Delay);
       digitalWrite(M_Pul, LOW);
       delayMicroseconds(Pulse_Delay);
-      Pulse_Delay++;
-    } 
+      Pulse_Delay--;
+    }
+
+while (digitalRead(L_SizeA_Shift) == LOW)
+   {
+      digitalWrite(M_Pul,HIGH); 
+      delayMicroseconds(Pulse_Delay); 
+      digitalWrite(M_Pul,LOW); 
+      delayMicroseconds(Pulse_Delay); 
+   }
+
+Slow();
 }
-   
-   //if (runOnlyOnceL1 = false)
-   //{
-    //Level1();
-   //}
-//Idle();
-//delay(100);
-//}
+
 
 //--------------------------------------------------------------------------------------
 //Code Functions.
 //--------------------------------------------------------------------------------------
+void Slow()
+{
+for (int x = 0; x < 400; x++)
+        {
+          digitalWrite(M_Pul, HIGH);
+          delayMicroseconds(Pulse_Delay);
+          digitalWrite(M_Pul, LOW);
+          delayMicroseconds(Pulse_Delay);
+          Pulse_Delay++;
+        }
+
+while (digitalRead(B_RangeDown) == HIGH) 
+       {
+      digitalWrite(M_Pul,HIGH); 
+      delayMicroseconds(Pulse_Delay); 
+      digitalWrite(M_Pul,LOW); 
+      delayMicroseconds(Pulse_Delay); 
+       }    
+
+}
+
+   
+void Constant()
+{
+  digitalWrite(M_Pul, HIGH);
+  delayMicroseconds(Pulse_Delay);
+  digitalWrite(M_Pul, LOW);
+  delayMicroseconds(Pulse_Delay);
+}
+
 void initializing()
 {
   digitalWrite(S_Rd, LOW);                   //Default Status Light LED Is High (Off).
@@ -387,28 +460,25 @@ void Stacker_Preset_S()
       digitalWrite(M_Pul, LOW);
       delayMicroseconds(Pulse_Delay);
     }
-   Next_Trigger();
   }
 }
+ 
   void Next_Trigger()
   {
-    while((digitalRead(L_Top_Shift) == HIGH) && (digitalRead(B_RangeDown) == HIGH))
+    Pulse_Delay = 900;
+    while(1)
     {
+   while(digitalRead(L_Top_Shift) == HIGH)
+   {
       digitalWrite(M_Pul, HIGH);
       delayMicroseconds(Pulse_Delay);
       digitalWrite(M_Pul, LOW);
       delayMicroseconds(Pulse_Delay);
     }
-   
-    while((digitalRead(L_Top_Shift) == LOW) && (digitalRead(B_RangeDown) == HIGH))
-    {
-       Idle();
-    }  
-    if (digitalRead(B_RangeDown) == LOW)
-    {
-      Mode_End();
-    }
+    } 
+    //Next_Trigger;
   }
+  
   
  void Mode_End()
  {
